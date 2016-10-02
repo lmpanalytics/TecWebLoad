@@ -43,6 +43,7 @@ public class Load {
 			Query.loadCSV_IB(INPUT_FILE_IB);
 			Query.getDBcontent();
 			Query.loadCSV_SP(INPUT_FILE_SP);
+			Query.fixDualMarketLinks();
 			Query.getDBcontent();
 
 			// ***************** DATA LOAD END *****************

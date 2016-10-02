@@ -39,9 +39,8 @@ public class Query {
 	// pw neo4j on the server is "s7asTaba". pw neo4j on my local machine is
 	// "Tokyo2000"
 	private static final Driver DRIVER = GraphDatabase.
-			// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j",
-			// "s7asTaba"));
-	driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "Tokyo2000"));
+			// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "s7asTaba"));
+			driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "Tokyo2000"));
 	// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "neo4j"));
 
 	/**
@@ -1999,6 +1998,39 @@ public class Query {
 			System.out.printf("%s > Wrote %s Ingredient Dosers to DB\n", LocalDateTime.now(), eqMap.size());
 		} catch (ClientException e) {
 			System.err.println("Exception in 'addIngredientDoser()':" + e);
+		}
+	}
+
+	/**
+	 * Handle instances of two different Markets linked to an Entity customer.
+	 * Rename the Relationship type to 'LINKED_SEC' between the differing
+	 * Market- and Country name, and keep the relationship type as 'LINKED'
+	 * between identical Market- and Country names. This will mitigate double
+	 * counting of Potentials.
+	 */
+	public static void fixDualMarketLinks() {
+
+		try (Session session = DRIVER.session()) {
+
+			try (Transaction tx1 = session.beginTransaction()) {
+
+				/**
+				 * Rename the Relationship type to 'LINKED_SEC' between
+				 * differing Market- and Country names
+				 */
+
+				String tx = "MATCH (m1: Market)-[r1]-(e: Entity)-[r2]-(m2: Market) MATCH (e: Entity)--(c: Country) "
+						+ "WHERE m1.name <> c.name AND m2.name = c.name CREATE (e)-[r: LINKED_SEC]->(m1) "
+						+ "WITH r1 DELETE r1";
+
+				tx1.run(tx);
+				tx1.success();
+
+			}
+
+			System.out.printf("%s > Fixed dual market links to customer entities\n", LocalDateTime.now());
+		} catch (ClientException e) {
+			System.err.println("Exception in 'fixDualMarketLinks()':" + e);
 		}
 	}
 
