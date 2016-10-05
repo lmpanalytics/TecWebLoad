@@ -39,8 +39,9 @@ public class Query {
 	// pw neo4j on the server is "s7asTaba". pw neo4j on my local machine is
 	// "Tokyo2000"
 	private static final Driver DRIVER = GraphDatabase.
-			// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "s7asTaba"));
-			driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "Tokyo2000"));
+			// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j",
+			// "s7asTaba"));
+	driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "Tokyo2000"));
 	// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "neo4j"));
 
 	/**
@@ -174,9 +175,9 @@ public class Query {
 				tx.run("CREATE INDEX ON :SingleParts(id)");
 
 				// Frigus Ingredient Dosers
-				// tx.run("CREATE INDEX ON :Kit3000(id)");
-				// tx.run("CREATE INDEX ON :Kit6000(id)");
-				// tx.run("CREATE INDEX ON :Kit12000(id)");
+				tx.run("CREATE INDEX ON :DosKit3000(id)");
+				tx.run("CREATE INDEX ON :DosKit6000(id)");
+				tx.run("CREATE INDEX ON :DosKit12000(id)");
 
 				tx.run("CREATE INDEX ON :HopperKit3000(id)");
 				tx.run("CREATE INDEX ON :HopperKit6000(id)");
@@ -320,9 +321,9 @@ public class Query {
 				tx.run("DROP INDEX ON :SingleParts(id)");
 
 				// Frigus Ingredient Dosers
-				// tx.run("DROP INDEX ON :Kit3000(id)");
-				// tx.run("DROP INDEX ON :Kit6000(id)");
-				// tx.run("DROP INDEX ON :Kit12000(id)");
+				tx.run("DROP INDEX ON :DosKit3000(id)");
+				tx.run("DROP INDEX ON :DosKit6000(id)");
+				tx.run("DROP INDEX ON :DosKit12000(id)");
 
 				tx.run("DROP INDEX ON :HopperKit3000(id)");
 				tx.run("DROP INDEX ON :HopperKit6000(id)");
@@ -1937,11 +1938,11 @@ public class Query {
 					// Add Equipment type to the Equipment node label
 					String tx = "MATCH (e: Equipment) WHERE e.id = " + key + " "
 					// Service kits
-							+ "MERGE (: Kit3000:Function {id: " + key + ", serviceInterval: toInt("
+							+ "MERGE (: DosKit3000:Function {id: " + key + ", serviceInterval: toInt("
 							+ v.getKit3000Interval() + ")})-[:IN {qty:  toInt(" + v.getKit3000Qty() + ")}]->(e)"
-							+ "MERGE (: Kit6000:Function {id: " + key + ", serviceInterval: toInt("
+							+ "MERGE (: DosKit6000:Function {id: " + key + ", serviceInterval: toInt("
 							+ v.getKit6000Interval() + ")})-[:IN {qty:  toInt(" + v.getKit6000Qty() + ")}]->(e)"
-							+ "MERGE (: Kit12000:Function {id: " + key + ", serviceInterval: toInt("
+							+ "MERGE (: DosKit12000:Function {id: " + key + ", serviceInterval: toInt("
 							+ v.getKit12000Interval() + ")})-[:IN {qty:  toInt(" + v.getKit12000Qty() + ")}]->(e)"
 							// Hopper
 							+ "MERGE (: HopperKit3000:Function {id: " + key + ", serviceInterval: toInt("
