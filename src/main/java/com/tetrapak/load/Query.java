@@ -996,7 +996,7 @@ public class Query {
 						"MATCH (e:Equipment) WHERE e.machSystem = {term1} \n"
 								+ "RETURN e.id AS ID, e.material AS material, "
 								+ "CASE WHEN e.model IS NULL THEN 'N/A' ELSE e.model END AS model",
-						Values.parameters("term1", "ICFREEZE", "term2", "FRIGUS"));
+						Values.parameters("term1", "ICFREEZE"));
 				tx.success();
 				while (result.hasNext()) {
 					Record r = result.next();
