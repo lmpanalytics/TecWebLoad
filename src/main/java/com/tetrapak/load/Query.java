@@ -573,7 +573,7 @@ public class Query {
 				StatementResult result = tx.run(
 						"MATCH (e:Equipment) WHERE e.machSystem = {term1} OR e.machSystem = {term2}\n"
 								+ "RETURN e.id AS ID, e.model AS Model, "
-								+ "CASE WHEN e.model CONTAINS '150' THEN true WHEN e.model CONTAINS '200' THEN true WHEN e.homoValveDesign = 'TD' THEN true ELSE false END AS hasTurnableDisk",
+								+ "CASE WHEN e.model CONTAINS '150' THEN true WHEN e.model CONTAINS '200' THEN true WHEN e.homoValveDesign = 'TD' THEN true WHEN e.homoValveDesign CONTAINS 'Disc valve' THEN true ELSE false END AS hasTurnableDisk",
 						Values.parameters("term1", "ALEX", "term2", "HOMO"));
 				tx.success();
 				while (result.hasNext()) {
