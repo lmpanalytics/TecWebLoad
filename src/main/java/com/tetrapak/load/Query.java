@@ -32,7 +32,7 @@ import org.neo4j.driver.v1.exceptions.ClientException;
  */
 public class Query {
 
-	private static final String HOSTNAME = "localhost";
+	private static final String HOSTNAME = "localhost:7687";
 
 	// 'For most use cases it is recommended to use a single driver instance
 	// throughout an application.'
@@ -2099,6 +2099,7 @@ public class Query {
 	 * Close the DB driver
 	 */
 	public static void closeNeo4jDriver() {
+		DRIVER.session().close();
 		DRIVER.close();
 	}
 
