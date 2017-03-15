@@ -2083,12 +2083,16 @@ public class Query {
 		try (Session session = DRIVER.session()) {
 			System.out.printf("%s > Delete Nodes and Relationships from DB\n", LocalDateTime.now());
 			// Run single statements one-by-one, OR...
-			String tx = "MATCH (e:Equipment) DETACH DELETE (e)";
+			String tx = "MATCH (eq:Equipment) DETACH DELETE (eq)";
 			String tx1 = "MATCH (f:Function) DETACH DELETE (f)";
 			String tx2 = "MATCH (p:Part) DETACH DELETE (p)";
+			String tx3 = "MATCH (e:Entity) DETACH DELETE (e)";
+			String tx4 = "MATCH (c:CustGrp) DETACH DELETE (c)";
 			session.run(tx);
 			session.run(tx1);
 			session.run(tx2);
+			session.run(tx3);
+			session.run(tx4);
 
 		} catch (ClientException e) {
 			System.err.println("Exception in 'dropDBdata()':" + e);
