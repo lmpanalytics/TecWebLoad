@@ -12,7 +12,6 @@ import com.tetrapak.equipment.IngredientDoser;
 import com.tetrapak.equipment.PlateHeatExchanger;
 import com.tetrapak.equipment.TubularHeatExchanger;
 import java.io.File;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.neo4j.driver.v1.AuthTokens;
@@ -24,6 +23,8 @@ import org.neo4j.driver.v1.StatementResult;
 import org.neo4j.driver.v1.Transaction;
 import org.neo4j.driver.v1.Values;
 import org.neo4j.driver.v1.exceptions.ClientException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class runs queries to the database
@@ -44,25 +45,30 @@ public class Query {
 	driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "Tokyo2000"));
 	// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "neo4j"));
 
+	private static Logger logger = LoggerFactory.getLogger(Query.class);
+
 	/**
 	 * Checks that the db is running and lists indexes and constraints in use
 	 */
 	public static void checkDatabaseIsRunning() {
 		try (Session session = DRIVER.session()) {
 			StatementResult result = session.run("CALL db.indexes()");
-			System.out.printf("********* DB is running with indexes *********\nDescription\t State \t Type\n");
+			logger.info("DB is running with indexes:");
+			String s1 = "Description", s2 = "State", s3 = "Type";
+			System.out.printf("%-40s %-10s %s\n", s1, s2, s3);
 			while (result.hasNext()) {
 				Record record = result.next();
-				System.out.printf("%s\t %s\t %s\n", record.get(0), record.get(1), record.get(2));
+				System.out.printf("%-40s %-10s %s\n", record.get(0), record.get(1), record.get(2));
 			}
 			StatementResult result1 = session.run("CALL db.constraints()");
-			System.out.println("\n********* DB is running with constraints *********");
+			System.out.println("");
+			logger.info("DB is running with constraints:");
 			while (result1.hasNext()) {
 				Record record = result1.next();
 				System.out.printf("%s\n", record.get(0));
 			}
 		} catch (ClientException e) {
-			System.err.println("Exception in 'checkDatabaseIsRunning()':" + e + "\nProgram exits[1]...");
+			logger.error("Exception in 'checkDatabaseIsRunning()':" + e + "\nProgram exits[1]...");
 			System.exit(1);
 		}
 	}
@@ -207,10 +213,11 @@ public class Query {
 				tx.run("CREATE CONSTRAINT ON " + "(pf:PartFamily) ASSERT pf.name IS UNIQUE");
 
 				tx.success();
+				logger.info("Created Indexes and Constraints");
 			}
-			System.out.printf("%s > Created Indexes and Constraints\n", LocalDateTime.now());
+
 		} catch (ClientException e) {
-			System.err.println("Exception in 'createIndexesAndConstraints()':" + e);
+			logger.error("Exception in 'createIndexesAndConstraints()':" + e);
 		}
 	}
 
@@ -353,10 +360,10 @@ public class Query {
 				tx.run("DROP CONSTRAINT ON " + "(pf:PartFamily) ASSERT pf.name IS UNIQUE");
 
 				tx.success();
+				logger.info("Dropped Indexes and Constraints");
 			}
-			System.out.printf("%s > Dropped Indexes and Constraints\n", LocalDateTime.now());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'dropIndexesAndConstraints()':" + e);
+			logger.error("Exception in 'dropIndexesAndConstraints()':" + e);
 		}
 	}
 
@@ -373,7 +380,7 @@ public class Query {
 			// System.out.printf("Path is %s%n ",path);
 			String cypherPathFormat = path.replace("\\", "/").replace("C:/", "file:///");
 			// System.out.printf("cypherPathFormat is %s%n ",cypherPathFormat);
-			System.out.printf("%s > Load data from '%s'\n", LocalDateTime.now(), path);
+			logger.info("Load data from '{}'", path);
 
 			// Entities, Customer groups, Customer types and Countries
 			String tx = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
@@ -408,7 +415,7 @@ public class Query {
 			session.run(tx20);
 
 		} catch (ClientException e) {
-			System.err.println("Exception in 'loadCSV_IB':" + e);
+			logger.error("Exception in 'loadCSV_IB':" + e);
 		}
 	}
 
@@ -425,7 +432,7 @@ public class Query {
 			// System.out.printf("Path is %s%n ",path);
 			String cypherPathFormat = path.replace("\\", "/").replace("C:/", "file:///");
 			// System.out.printf("cypherPathFormat is %s%n ",cypherPathFormat);
-			System.out.printf("%s > Load data from '%s'\n", LocalDateTime.now(), path);
+			logger.info("Load data from '{}'", path);
 
 			// Entities of Final customers
 			String tx = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
@@ -554,7 +561,7 @@ public class Query {
 
 			}
 		} catch (ClientException e) {
-			System.err.println("Exception in 'loadCSV_SP'" + e);
+			logger.error("Exception in 'loadCSV_SP'" + e);
 		}
 	}
 
@@ -679,9 +686,9 @@ public class Query {
 
 				}
 			}
-			System.out.printf("%s > Built %s Homogenisers\n", LocalDateTime.now(), equipmentMap.size());
+			logger.info("Built {} Homogenisers", equipmentMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'buildHomogenisers()':" + e);
+			logger.error("Exception in 'buildHomogenisers()':" + e);
 		}
 		return equipmentMap;
 	}
@@ -720,9 +727,9 @@ public class Query {
 							new Separator(intermediateKitInterval, majorKitInterval, oWMCInterval, fFInterval));
 				}
 			}
-			System.out.printf("%s > Built %s Separators\n", LocalDateTime.now(), equipmentMap.size());
+			logger.info("Built {} Separators", equipmentMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'buildSeparators()':" + e);
+			logger.error("Exception in 'buildSeparators()':" + e);
 		}
 		return equipmentMap;
 	}
@@ -837,9 +844,9 @@ public class Query {
 					}
 				}
 			}
-			System.out.printf("%s > Built %s Plate Heat Exchangers\n", LocalDateTime.now(), equipmentMap.size());
+			logger.info("Built {} Plate Heat Exchangers", equipmentMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'buildPHEs()':" + e);
+			logger.error("Exception in 'buildPHEs()':" + e);
 		}
 		return equipmentMap;
 	}
@@ -957,9 +964,9 @@ public class Query {
 					}
 				}
 			}
-			System.out.printf("%s > Built %s Tubular Heat Exchangers\n", LocalDateTime.now(), equipmentMap.size());
+			logger.info("Built {} Tubular Heat Exchangers", equipmentMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'buildTHEs()':" + e);
+			logger.error("Exception in 'buildTHEs()':" + e);
 		}
 		return equipmentMap;
 	}
@@ -1445,9 +1452,9 @@ public class Query {
 
 				}
 			}
-			System.out.printf("%s > Built %s Frigus Freezers\n", LocalDateTime.now(), equipmentMap.size());
+			logger.info("Built {} Frigus Freezers", equipmentMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'buildFrigusFreezers()':" + e);
+			logger.error("Exception in 'buildFrigusFreezers()':" + e);
 		}
 		return equipmentMap;
 	}
@@ -1611,10 +1618,10 @@ public class Query {
 					}
 				}
 			}
-			System.out.printf("%s > Built %s Ingredient Dosers\n", LocalDateTime.now(), equipmentMap.size());
+			logger.info("Built {} Ingredient Dosers", equipmentMap.size());
 
 		} catch (ClientException e) {
-			System.err.println("Exception in 'buildIngredientDosers()':" + e);
+			logger.error("Exception in 'buildIngredientDosers()':" + e);
 		}
 		return equipmentMap;
 	}
@@ -1671,9 +1678,9 @@ public class Query {
 				}
 			}
 
-			System.out.printf("%s > Wrote %s Homogenisers to DB\n", LocalDateTime.now(), eqMap.size());
+			logger.info("Wrote {} Homogenisers to DB", eqMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'addHomogeniser()':" + e);
+			logger.error("Exception in 'addHomogeniser()':" + e);
 		}
 	}
 
@@ -1705,9 +1712,9 @@ public class Query {
 				}
 			}
 
-			System.out.printf("%s > Wrote %s Separators to DB\n", LocalDateTime.now(), eqMap.size());
+			logger.info("Wrote {} Separators to DB", eqMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'addSeparator()':" + e);
+			logger.error("Exception in 'addSeparator()':" + e);
 		}
 	}
 
@@ -1770,9 +1777,9 @@ public class Query {
 				}
 			}
 
-			System.out.printf("%s > Wrote %s Plate Heat Exchangers to DB\n", LocalDateTime.now(), eqMap.size());
+			logger.info("Wrote {} Plate Heat Exchangers to DB", eqMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'addPHE()':" + e);
+			logger.error("Exception in 'addPHE()':" + e);
 		}
 	}
 
@@ -1838,9 +1845,9 @@ public class Query {
 				}
 			}
 
-			System.out.printf("%s > Wrote %s Tubular Heat Exchangers to DB\n", LocalDateTime.now(), eqMap.size());
+			logger.info("Wrote {} Tubular Heat Exchangers to DB", eqMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'addTHE()':" + e);
+			logger.error("Exception in 'addTHE()':" + e);
 		}
 	}
 
@@ -1915,9 +1922,9 @@ public class Query {
 				}
 			}
 
-			System.out.printf("%s > Wrote %s Frigus Freezers to DB\n", LocalDateTime.now(), eqMap.size());
+			logger.info("Wrote {} Frigus Freezers to DB", eqMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'addFrigusFreezer()':" + e);
+			logger.error("Exception in 'addFrigusFreezer()':" + e);
 		}
 	}
 
@@ -1996,9 +2003,9 @@ public class Query {
 				}
 			}
 
-			System.out.printf("%s > Wrote %s Ingredient Dosers to DB\n", LocalDateTime.now(), eqMap.size());
+			logger.info("Wrote {} Ingredient Dosers to DB", eqMap.size());
 		} catch (ClientException e) {
-			System.err.println("Exception in 'addIngredientDoser()':" + e);
+			logger.error("Exception in 'addIngredientDoser()':" + e);
 		}
 	}
 
@@ -2029,9 +2036,9 @@ public class Query {
 
 			}
 
-			System.out.printf("%s > Fixed dual market links to customer entities\n", LocalDateTime.now());
+			logger.info("Fixed dual market links to customer entities");
 		} catch (ClientException e) {
-			System.err.println("Exception in 'fixDualMarketLinks()':" + e);
+			logger.error("Exception in 'fixDualMarketLinks()':" + e);
 		}
 	}
 
@@ -2063,16 +2070,15 @@ public class Query {
 
 				while (r1.hasNext()) {
 					Record record = r1.next();
-					System.out.printf("%s > DB contains %s nodes\n", LocalDateTime.now(), record.get("nodes"));
+					logger.info("DB contains {} nodes", record.get("nodes"));
 				}
 				while (r2.hasNext()) {
 					Record record = r2.next();
-					System.out.printf("%s > DB contains %s relationships\n", LocalDateTime.now(),
-							record.get("relationships"));
+					logger.info("DB contains {} relationships", record.get("relationships"));
 				}
 			}
 		} catch (ClientException e) {
-			System.err.println("Exception in 'getDBcontent()':" + e);
+			logger.error("Exception in 'getDBcontent()':" + e);
 		}
 	}
 
@@ -2081,7 +2087,7 @@ public class Query {
 	 */
 	public static void dropDBdata() {
 		try (Session session = DRIVER.session()) {
-			System.out.printf("%s > Delete Nodes and Relationships from DB\n", LocalDateTime.now());
+			logger.info("Delete Nodes and Relationships from DB");
 			// Run single statements one-by-one, OR...
 			String tx = "MATCH (eq:Equipment) DETACH DELETE (eq)";
 			String tx1 = "MATCH (f:Function) DETACH DELETE (f)";
@@ -2095,7 +2101,7 @@ public class Query {
 			session.run(tx4);
 
 		} catch (ClientException e) {
-			System.err.println("Exception in 'dropDBdata()':" + e);
+			logger.error("Exception in 'dropDBdata()':" + e);
 		}
 	}
 
@@ -2122,9 +2128,9 @@ public class Query {
 				tx1.run("Cypher query or statement");
 				tx1.success();
 			}
-			System.out.printf("%s > |Output message goes here|\n", LocalDateTime.now());
+			logger.info("|Output message goes here|");
 		} catch (ClientException e) {
-			System.err.println("Exception in 'someQuery()':" + e);
+			logger.error("Exception in 'someQuery()':" + e);
 		}
 	}
 

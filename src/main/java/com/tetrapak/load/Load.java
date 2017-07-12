@@ -6,7 +6,8 @@
 package com.tetrapak.load;
 
 import java.awt.Toolkit;
-import java.time.LocalDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class reads in two text files, one for the Installed base and one for
@@ -22,6 +23,8 @@ public class Load {
 
 	private static final String INPUT_FILE_IB = "dfNeoIB.csv";
 	private static final String INPUT_FILE_SP = "dfNeoSP_Inv.csv";
+
+	private static Logger logger = LoggerFactory.getLogger(Load.class);
 
 	/**
 	 * @param args
@@ -61,7 +64,7 @@ public class Load {
 
 		} finally {
 			Query.closeNeo4jDriver();
-			System.out.printf("%n%s > Succesfully closed DB Driver\n", LocalDateTime.now());
+			logger.info("Succesfully closed DB Driver");
 		}
 
 	}
