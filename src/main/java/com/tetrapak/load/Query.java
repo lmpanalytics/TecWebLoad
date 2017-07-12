@@ -5,15 +5,10 @@
  */
 package com.tetrapak.load;
 
-import com.tetrapak.equipment.FrigusFreezer;
-import com.tetrapak.equipment.Separator;
-import com.tetrapak.equipment.Homogeniser;
-import com.tetrapak.equipment.IngredientDoser;
-import com.tetrapak.equipment.PlateHeatExchanger;
-import com.tetrapak.equipment.TubularHeatExchanger;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.GraphDatabase;
@@ -25,6 +20,13 @@ import org.neo4j.driver.v1.Values;
 import org.neo4j.driver.v1.exceptions.ClientException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.tetrapak.equipment.FrigusFreezer;
+import com.tetrapak.equipment.Homogeniser;
+import com.tetrapak.equipment.IngredientDoser;
+import com.tetrapak.equipment.PlateHeatExchanger;
+import com.tetrapak.equipment.Separator;
+import com.tetrapak.equipment.TubularHeatExchanger;
 
 /**
  * This class runs queries to the database
@@ -383,8 +385,7 @@ public class Query {
 			logger.info("Load data from '{}'", path);
 
 			// Entities, Customer groups, Customer types and Countries
-			String tx = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line "
+			String tx = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
 					+ "MERGE (entity: Entity {id: line.CustKey, name: UPPER(line.CustName)}) "
 					+ "MERGE (custGrp: CustGrp {id: line.CustGroupKey, name: UPPER(line.CustGroupName)}) "
 					+ "MERGE (custType: CustType {name: UPPER(line.CustTypeName)}) "
@@ -395,8 +396,8 @@ public class Query {
 			session.run(tx);
 
 			// Markets, Market groups and Clusters
-			String tx10 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line " + "MATCH (entity: Entity {id: line.CustKey}) "
+			String tx10 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+					+ "MATCH (entity: Entity {id: line.CustKey}) "
 					+ "MERGE (market: Market {id: line.MarketKey, name: UPPER(line.MarketName)}) "
 					+ "MERGE (marketGrp: MarketGrp {id: line.MarketGroupKey, name: UPPER(line.MarketGroupName)}) "
 					+ "MERGE (cluster: Cluster {id: line.Cluster}) "
@@ -407,15 +408,16 @@ public class Query {
 			session.run(tx10);
 
 			// Equipments
-			String tx20 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line " + "MATCH (entity: Entity {id: line.CustKey} )"
+			String tx20 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+					+ "MATCH (entity: Entity {id: line.CustKey} )"
 					+ "MERGE (equipment: Equipment {id: line.EquipmentKey, name: line.EquipmentName, serialNo: line.SerialNumber, eQtype: line.EquipmentType, machSystem: line.MachineSystem, material: line.Material, model: line.ModelNumber, constructionYear: toInt(CASE line.ConstructionYear WHEN 'NA' THEN '0' ELSE line.ConstructionYear END), runningHoursPA: toFloat(line.HoursPerYear), heatNoPlatesTubes: toInt(line.HeatNoPlatesTubes), heatPercRegen: toFloat(line.HeatPercRegen), homoValveDesign: line.HomoValveDesign}) "
 					+ "MERGE (equipment)-[:IB_ROUTE {qty: toFloat(1), type: 'FINAL'}]->(entity)";
 
 			session.run(tx20);
 
 		} catch (ClientException e) {
-			logger.error("Exception in 'loadCSV_IB':" + e);
+			logger.error("Exception in 'loadCSV_IB': " + e + "\nExit code: 1");
+			System.exit(1);
 		}
 	}
 
@@ -435,44 +437,41 @@ public class Query {
 			logger.info("Load data from '{}'", path);
 
 			// Entities of Final customers
-			String tx = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line "
-					/*
-					 * Add any missing nodes (the setdiff) between the db and
-					 * the csv file
-					 */
+			String tx = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+			/*
+			 * Add any missing nodes (the setdiff) between the db and the csv
+			 * file
+			 */
 					+ "OPTIONAL MATCH (e: Entity {id: line.CustKey} ) " + "WITH e, line " + "WHERE e.id IS NULL "
 					+ "MERGE (:Entity {id: line.CustKey, name: UPPER(line.CustName)})";
 
 			session.run(tx);
 
 			// Entities of Customer Groups
-			String tx10 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line "
-					/*
-					 * Add any missing nodes (the setdiff) between the db and
-					 * the csv file
-					 */
+			String tx10 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+			/*
+			 * Add any missing nodes (the setdiff) between the db and the csv
+			 * file
+			 */
 					+ "OPTIONAL MATCH (c: CustGrp {id: line.CustGroupKey} ) " + "WITH c, line " + "WHERE c.id IS NULL "
 					+ "MERGE (:CustGrp {id: line.CustGroupKey, name: UPPER(line.CustGroupName)})";
 
 			session.run(tx10);
 
 			// Entities of Customer Types
-			String tx20 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line "
-					/*
-					 * Add any missing nodes (the setdiff) between the db and
-					 * the csv file
-					 */
+			String tx20 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+			/*
+			 * Add any missing nodes (the setdiff) between the db and the csv
+			 * file
+			 */
 					+ "OPTIONAL MATCH (c: CustType {name: line.CustTypeName} ) " + "WITH c, line "
 					+ "WHERE c.name IS NULL " + "MERGE (:CustType {name: UPPER(line.CustTypeName)})";
 
 			session.run(tx20);
 
 			// Customer Relationships Customer Key driven
-			String tx30 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line " + "MATCH (entity: Entity {id: line.CustKey} ) "
+			String tx30 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+					+ "MATCH (entity: Entity {id: line.CustKey} ) "
 					+ "MATCH (custGrp: CustGrp {id: line.CustGroupKey} ) "
 					+ "MATCH (custType: CustType {name: line.CustTypeName} ) " + "MERGE (entity)-[:IN]->(custGrp) "
 					+ "MERGE (entity)-[:IN]->(custType)";
@@ -480,24 +479,22 @@ public class Query {
 			session.run(tx30);
 
 			// Markets
-			String tx40 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line "
-					/*
-					 * Add any missing nodes (the setdiff) between the db and
-					 * the csv file
-					 */
+			String tx40 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+			/*
+			 * Add any missing nodes (the setdiff) between the db and the csv
+			 * file
+			 */
 					+ "OPTIONAL MATCH (m: Market {id: line.MarketKey} ) " + "WITH m, line " + "WHERE m.id IS NULL "
 					+ "MERGE (:Market {id: line.MarketKey, name: UPPER(line.MarketName)})";
 
 			session.run(tx40);
 
 			// Market groups
-			String tx50 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line "
-					/*
-					 * Add any missing nodes (the setdiff) between the db and
-					 * the csv file
-					 */
+			String tx50 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+			/*
+			 * Add any missing nodes (the setdiff) between the db and the csv
+			 * file
+			 */
 					+ "OPTIONAL MATCH (m: MarketGrp {id: line.MarketGroupKey} ) " + "WITH m, line "
 					+ "WHERE m.id IS NULL "
 					+ "MERGE (:MarketGrp {id: line.MarketGroupKey, name: UPPER(line.MarketGroupName)})";
@@ -505,21 +502,19 @@ public class Query {
 			session.run(tx50);
 
 			// Clusters
-			String tx60 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line "
-					/*
-					 * Add any missing nodes (the setdiff) between the db and
-					 * the csv file
-					 */
+			String tx60 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+			/*
+			 * Add any missing nodes (the setdiff) between the db and the csv
+			 * file
+			 */
 					+ "OPTIONAL MATCH (c: Cluster {id: line.Cluster} ) " + "WITH c, line " + "WHERE c.id IS NULL "
 					+ "MERGE (:Cluster {id: line.Cluster})";
 
 			session.run(tx60);
 
 			// Market Relationships Customer Key driven
-			String tx70 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line " + "MATCH (entity: Entity {id: line.CustKey} ) "
-					+ "MATCH (market: Market {id: line.MarketKey} ) "
+			String tx70 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+					+ "MATCH (entity: Entity {id: line.CustKey} ) " + "MATCH (market: Market {id: line.MarketKey} ) "
 					+ "MATCH (marketGrp: MarketGrp {id: line.MarketGroupKey} ) "
 					+ "MATCH (cluster: Cluster {id: line.Cluster} ) " + "MERGE (entity)-[:LINKED]->(market) "
 					+ "MERGE (market)-[:IN]->(marketGrp) " + "MERGE (marketGrp)-[:IN]->(cluster)";
@@ -527,8 +522,8 @@ public class Query {
 			session.run(tx70);
 
 			// Parts, Type and Quantity
-			String tx80 = "USING PERIODIC COMMIT " + "LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
-					+ "\" AS line FIELDTERMINATOR ';' " + "WITH line " + "MATCH (entity: Entity {id: line.CustKey} )  "
+			String tx80 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
+					+ "MATCH (entity: Entity {id: line.CustKey} )  "
 					+ "MERGE (part: Part {id: line.Material, name: UPPER(line.Type)})  "
 					+ "MERGE (partFamily: PartFamily {name: UPPER(line.Type)})  "
 					+ "MERGE (part)-[:ROUTE {qty: toFloat(line.Qty), type: 'FINAL'}]->(entity) "
@@ -561,7 +556,8 @@ public class Query {
 
 			}
 		} catch (ClientException e) {
-			logger.error("Exception in 'loadCSV_SP'" + e);
+			logger.error("Exception in 'loadCSV_SP': " + e + "\nExit code: 1");
+			System.exit(1);
 		}
 	}
 
