@@ -385,8 +385,8 @@ public class Query {
 			logger.info("Load data from '{}'", path);
 
 			// Entities, Customer groups, Customer types and Countries
-			String tx = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-					+ "MERGE (entity: Entity {id: line.CustKey, name: UPPER(line.CustName)}) "
+			String tx = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line " + "MERGE (entity: Entity {id: line.CustKey, name: UPPER(line.CustName)}) "
 					+ "MERGE (custGrp: CustGrp {id: line.CustGroupKey, name: UPPER(line.CustGroupName)}) "
 					+ "MERGE (custType: CustType {name: UPPER(line.CustTypeName)}) "
 					+ "MERGE (country: Country {id: line.CountryCode, name: UPPER(line.CountryName)}) "
@@ -396,8 +396,8 @@ public class Query {
 			session.run(tx);
 
 			// Markets, Market groups and Clusters
-			String tx10 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-					+ "MATCH (entity: Entity {id: line.CustKey}) "
+			String tx10 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line " + "MATCH (entity: Entity {id: line.CustKey}) "
 					+ "MERGE (market: Market {id: line.MarketKey, name: UPPER(line.MarketName)}) "
 					+ "MERGE (marketGrp: MarketGrp {id: line.MarketGroupKey, name: UPPER(line.MarketGroupName)}) "
 					+ "MERGE (cluster: Cluster {id: line.Cluster}) "
@@ -408,8 +408,8 @@ public class Query {
 			session.run(tx10);
 
 			// Equipments
-			String tx20 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-					+ "MATCH (entity: Entity {id: line.CustKey} )"
+			String tx20 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line " + "MATCH (entity: Entity {id: line.CustKey} )"
 					+ "MERGE (equipment: Equipment {id: line.EquipmentKey, name: line.EquipmentName, serialNo: line.SerialNumber, eQtype: line.EquipmentType, machSystem: line.MachineSystem, material: line.Material, model: line.ModelNumber, constructionYear: toInt(CASE line.ConstructionYear WHEN 'NA' THEN '0' ELSE line.ConstructionYear END), runningHoursPA: toFloat(line.HoursPerYear), heatNoPlatesTubes: toInt(line.HeatNoPlatesTubes), heatPercRegen: toFloat(line.HeatPercRegen), homoValveDesign: line.HomoValveDesign}) "
 					+ "MERGE (equipment)-[:IB_ROUTE {qty: toFloat(1), type: 'FINAL'}]->(entity)";
 
@@ -437,41 +437,44 @@ public class Query {
 			logger.info("Load data from '{}'", path);
 
 			// Entities of Final customers
-			String tx = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-			/*
-			 * Add any missing nodes (the setdiff) between the db and the csv
-			 * file
-			 */
+			String tx = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line "
+					/*
+					 * Add any missing nodes (the setdiff) between the db and
+					 * the csv file
+					 */
 					+ "OPTIONAL MATCH (e: Entity {id: line.CustKey} ) " + "WITH e, line " + "WHERE e.id IS NULL "
 					+ "MERGE (:Entity {id: line.CustKey, name: UPPER(line.CustName)})";
 
 			session.run(tx);
 
 			// Entities of Customer Groups
-			String tx10 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-			/*
-			 * Add any missing nodes (the setdiff) between the db and the csv
-			 * file
-			 */
+			String tx10 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line "
+					/*
+					 * Add any missing nodes (the setdiff) between the db and
+					 * the csv file
+					 */
 					+ "OPTIONAL MATCH (c: CustGrp {id: line.CustGroupKey} ) " + "WITH c, line " + "WHERE c.id IS NULL "
 					+ "MERGE (:CustGrp {id: line.CustGroupKey, name: UPPER(line.CustGroupName)})";
 
 			session.run(tx10);
 
 			// Entities of Customer Types
-			String tx20 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-			/*
-			 * Add any missing nodes (the setdiff) between the db and the csv
-			 * file
-			 */
+			String tx20 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line "
+					/*
+					 * Add any missing nodes (the setdiff) between the db and
+					 * the csv file
+					 */
 					+ "OPTIONAL MATCH (c: CustType {name: line.CustTypeName} ) " + "WITH c, line "
 					+ "WHERE c.name IS NULL " + "MERGE (:CustType {name: UPPER(line.CustTypeName)})";
 
 			session.run(tx20);
 
 			// Customer Relationships Customer Key driven
-			String tx30 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-					+ "MATCH (entity: Entity {id: line.CustKey} ) "
+			String tx30 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line " + "MATCH (entity: Entity {id: line.CustKey} ) "
 					+ "MATCH (custGrp: CustGrp {id: line.CustGroupKey} ) "
 					+ "MATCH (custType: CustType {name: line.CustTypeName} ) " + "MERGE (entity)-[:IN]->(custGrp) "
 					+ "MERGE (entity)-[:IN]->(custType)";
@@ -479,22 +482,24 @@ public class Query {
 			session.run(tx30);
 
 			// Markets
-			String tx40 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-			/*
-			 * Add any missing nodes (the setdiff) between the db and the csv
-			 * file
-			 */
+			String tx40 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line "
+					/*
+					 * Add any missing nodes (the setdiff) between the db and
+					 * the csv file
+					 */
 					+ "OPTIONAL MATCH (m: Market {id: line.MarketKey} ) " + "WITH m, line " + "WHERE m.id IS NULL "
 					+ "MERGE (:Market {id: line.MarketKey, name: UPPER(line.MarketName)})";
 
 			session.run(tx40);
 
 			// Market groups
-			String tx50 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-			/*
-			 * Add any missing nodes (the setdiff) between the db and the csv
-			 * file
-			 */
+			String tx50 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line "
+					/*
+					 * Add any missing nodes (the setdiff) between the db and
+					 * the csv file
+					 */
 					+ "OPTIONAL MATCH (m: MarketGrp {id: line.MarketGroupKey} ) " + "WITH m, line "
 					+ "WHERE m.id IS NULL "
 					+ "MERGE (:MarketGrp {id: line.MarketGroupKey, name: UPPER(line.MarketGroupName)})";
@@ -502,19 +507,21 @@ public class Query {
 			session.run(tx50);
 
 			// Clusters
-			String tx60 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-			/*
-			 * Add any missing nodes (the setdiff) between the db and the csv
-			 * file
-			 */
+			String tx60 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line "
+					/*
+					 * Add any missing nodes (the setdiff) between the db and
+					 * the csv file
+					 */
 					+ "OPTIONAL MATCH (c: Cluster {id: line.Cluster} ) " + "WITH c, line " + "WHERE c.id IS NULL "
 					+ "MERGE (:Cluster {id: line.Cluster})";
 
 			session.run(tx60);
 
 			// Market Relationships Customer Key driven
-			String tx70 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-					+ "MATCH (entity: Entity {id: line.CustKey} ) " + "MATCH (market: Market {id: line.MarketKey} ) "
+			String tx70 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line " + "MATCH (entity: Entity {id: line.CustKey} ) "
+					+ "MATCH (market: Market {id: line.MarketKey} ) "
 					+ "MATCH (marketGrp: MarketGrp {id: line.MarketGroupKey} ) "
 					+ "MATCH (cluster: Cluster {id: line.Cluster} ) " + "MERGE (entity)-[:LINKED]->(market) "
 					+ "MERGE (market)-[:IN]->(marketGrp) " + "MERGE (marketGrp)-[:IN]->(cluster)";
@@ -522,8 +529,8 @@ public class Query {
 			session.run(tx70);
 
 			// Parts, Type and Quantity
-			String tx80 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat + "\" AS line WITH line "
-					+ "MATCH (entity: Entity {id: line.CustKey} )  "
+			String tx80 = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
+					+ "\" AS line WITH line " + "MATCH (entity: Entity {id: line.CustKey} )  "
 					+ "MERGE (part: Part {id: line.Material, name: UPPER(line.Type)})  "
 					+ "MERGE (partFamily: PartFamily {name: UPPER(line.Type)})  "
 					+ "MERGE (part)-[:ROUTE {qty: toFloat(line.Qty), type: 'FINAL'}]->(entity) "
@@ -1460,6 +1467,11 @@ public class Query {
 	 * the functional areas.
 	 *
 	 * Mapping to models is done on Material Keys.
+	 * 
+	 * It first attempts mapping on Material Keys, and if there is no match,
+	 * then search for old type of Dosers, i.e., Equipment material equals
+	 * '2623489-0100', and do a secondary search on modelNumberEqmnt by Regex on
+	 * descending numbers.
 	 *
 	 * @return map of Equipment numbers and Ingredient Doser class fields
 	 */
@@ -1490,7 +1502,7 @@ public class Query {
 
 					String key = r.get("ID").toString();
 					String equipmentMtrlKey = r.get("material").asString();
-					// String modelNumberEqmnt = r.get("model").asString();
+					String modelNumberEqmnt = r.get("model").asString();
 
 					// Set default values
 					String modelType;
@@ -1611,6 +1623,49 @@ public class Query {
 						default:
 							break;
 						}
+						/*
+						 * If map doesn't contain a mapping then search for old
+						 * type of Dosers, i.e., Equipment material equals
+						 * '2623489-0100', and do a secondary search on
+						 * modelNumberEqmnt by Regex on descending numbers.
+						 */
+					} else if (equipmentMtrlKey.equals("2623489-0100") && modelNumberEqmnt.contains("2000")) {
+
+						modelType = "FF2000";
+						// Update quantities ?
+						// Update Interval ?
+
+						equipmentMap.put(key, new IngredientDoser(modelType, kit3000Interval, kit3000Qty,
+								kit6000Interval, kit6000Qty, kit12000Interval, kit12000Qty, hopperKit3000Interval,
+								hopperKit3000Qty, hopperKit6000Interval, hopperKit6000Qty, hopperKit12000Interval,
+								hopperKit12000Qty, mixerKit3000Interval, mixerKit3000Qty, mixerKit6000Interval,
+								mixerKit6000Qty, mixerKit12000Interval, mixerKit12000Qty, pumpKit3000Interval,
+								pumpKit3000Qty, pumpKit6000Interval, pumpKit6000Qty, pumpKit12000Interval,
+								pumpKit12000Qty, coverKit3000Interval, coverKit3000Qty, agitatorKit6000Interval,
+								agitatorKit6000Qty, agitatorKit12000Interval, agitatorKit12000Qty, lamellaInterval,
+								lamellaQty, dasherInterval, dasherQty, pumpHouseInterval, pumpHouseQty));
+
+					} else if (equipmentMtrlKey.equals("2623489-0100") && modelNumberEqmnt.contains("4000")) {
+
+						modelType = "FF4000";
+						// Update quantities ?
+						// Update Interval ?
+
+						equipmentMap.put(key, new IngredientDoser(modelType, kit3000Interval, kit3000Qty,
+								kit6000Interval, kit6000Qty, kit12000Interval, kit12000Qty, hopperKit3000Interval,
+								hopperKit3000Qty, hopperKit6000Interval, hopperKit6000Qty, hopperKit12000Interval,
+								hopperKit12000Qty, mixerKit3000Interval, mixerKit3000Qty, mixerKit6000Interval,
+								mixerKit6000Qty, mixerKit12000Interval, mixerKit12000Qty, pumpKit3000Interval,
+								pumpKit3000Qty, pumpKit6000Interval, pumpKit6000Qty, pumpKit12000Interval,
+								pumpKit12000Qty, coverKit3000Interval, coverKit3000Qty, agitatorKit6000Interval,
+								agitatorKit6000Qty, agitatorKit12000Interval, agitatorKit12000Qty, lamellaInterval,
+								lamellaQty, dasherInterval, dasherQty, pumpHouseInterval, pumpHouseQty));
+
+					} else {
+						/*
+						 * Do nothing (exclude equipments from the Ingredient
+						 * Doser mapping)
+						 */
 					}
 				}
 			}
