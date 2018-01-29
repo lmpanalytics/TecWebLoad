@@ -378,11 +378,11 @@ public class Query {
 	public static void loadCSV_IB(String INPUT_FILE_NAME) {
 
 		try (Session session = DRIVER.session()) {
-			String path = new File(INPUT_FILE_NAME).getAbsolutePath();
+			String path = new File("C:/", INPUT_FILE_NAME).toString();
 			// System.out.printf("Path is %s%n ",path);
 			String cypherPathFormat = path.replace("\\", "/").replace("C:/", "file:///");
 			// System.out.printf("cypherPathFormat is %s%n ",cypherPathFormat);
-			logger.info("Load data from '{}'", path);
+			logger.info("Load data from '{}'", cypherPathFormat);
 
 			// Entities, Customer groups, Customer types and Countries
 			String tx = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
@@ -430,11 +430,11 @@ public class Query {
 	public static void loadCSV_SP(String INPUT_FILE_NAME) {
 
 		try (Session session = DRIVER.session()) {
-			String path = new File(INPUT_FILE_NAME).getAbsolutePath();
+			String path = new File("C:/", INPUT_FILE_NAME).toString();
 			// System.out.printf("Path is %s%n ",path);
 			String cypherPathFormat = path.replace("\\", "/").replace("C:/", "file:///");
 			// System.out.printf("cypherPathFormat is %s%n ",cypherPathFormat);
-			logger.info("Load data from '{}'", path);
+			logger.info("Load data from '{}'", cypherPathFormat);
 
 			// Entities of Final customers
 			String tx = "USING PERIODIC COMMIT LOAD CSV WITH HEADERS FROM \"" + cypherPathFormat
