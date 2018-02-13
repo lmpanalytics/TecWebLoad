@@ -42,8 +42,7 @@ public class Query {
 	// pw neo4j on the server is "s7asTaba". pw neo4j on my local machine is
 	// "Tokyo2000"
 	private static final Driver DRIVER = GraphDatabase.
-			// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j",
-			// "s7asTaba"));
+//	driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "s7asTaba"));
 	driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "Tokyo2000"));
 	// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "neo4j"));
 
