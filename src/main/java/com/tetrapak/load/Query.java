@@ -2144,11 +2144,13 @@ public class Query {
 			String tx2 = "MATCH (p:Part) DETACH DELETE (p)";
 			String tx3 = "MATCH (e:Entity) DETACH DELETE (e)";
 			String tx4 = "MATCH (c:CustGrp) DETACH DELETE (c)";
+                        String tx5 = "MATCH (m:MarketGrp) DETACH DELETE (m);";
 			session.run(tx);
 			session.run(tx1);
 			session.run(tx2);
 			session.run(tx3);
 			session.run(tx4);
+                        session.run(tx5);
 
 		} catch (ClientException e) {
 			logger.error("Exception in 'dropDBdata()':" + e);
