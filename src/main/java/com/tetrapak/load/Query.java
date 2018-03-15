@@ -44,7 +44,6 @@ public class Query {
 	private static final Driver DRIVER = GraphDatabase.
 //	driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "s7asTaba"));
 	driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "Tokyo2000"));
-	// driver("bolt://" + HOSTNAME + "", AuthTokens.basic("neo4j", "neo4j"));
 
 	private static Logger logger = LoggerFactory.getLogger(Query.class);
 
